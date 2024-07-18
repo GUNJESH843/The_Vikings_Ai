@@ -1,9 +1,11 @@
-import os
 import streamlit as st
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
+import os
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+import google.generativeai as genai
 from langchain.vectorstores import FAISS
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
@@ -13,14 +15,11 @@ import faiss
 import pickle
 import asyncio
 
-# Load environment variables from .env file
 load_dotenv()
 
-# Retrieve and configure Google API key
-google_api_key = os.getenv("GOOGLE_API_KEY")
-genai.configure(api_key=google_api_key)
+os.getenv("GOOGLE_API_KEY")
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-# Function to extract text from PDF files
 def get_pdf_text(pdf_docs):
     text = ""
     for pdf in pdf_docs:
@@ -29,13 +28,11 @@ def get_pdf_text(pdf_docs):
             text += page.extract_text()
     return text
 
-# Function to split text into chunks
 def get_text_chunks(text):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     chunks = text_splitter.split_text(text)
     return chunks
 
-# Function to create and store vector embeddings
 def get_vector_store(text_chunks):
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
     vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
@@ -43,7 +40,6 @@ def get_vector_store(text_chunks):
     with open("faiss_store.pkl", "wb") as f:
         pickle.dump({"docstore": vector_store.docstore, "index_to_docstore_id": vector_store.index_to_docstore_id}, f)
 
-# Function to load vector embeddings from storage
 def load_vector_store():
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
     index = faiss.read_index("faiss_index.bin")
@@ -52,7 +48,6 @@ def load_vector_store():
     vector_store = FAISS(embedding_function=embeddings.embed_query, index=index, docstore=store_data["docstore"], index_to_docstore_id=store_data["index_to_docstore_id"])
     return vector_store
 
-# Function to asynchronously load conversational AI chain
 async def get_conversational_chain():
     prompt_template = """
     Leave First 1 line empty and then give reply
@@ -79,7 +74,6 @@ async def get_conversational_chain():
 
     return chain
 
-# Function to handle user input and retrieve AI response
 def user_input(user_question):
     vector_store = load_vector_store()
     docs = vector_store.similarity_search(user_question)
@@ -94,15 +88,15 @@ def user_input(user_question):
     st.session_state.output_text = response["output_text"]
     st.write("Reply: ", st.session_state.output_text)
 
-# Main function to setup Streamlit app
 def main():
+    # st.set_page_config("College.ai", page_icon='🔍', layout='centered')
+   
     st.write("<h1><center>One-Click Conversions</center></h1>", unsafe_allow_html=True)
     st.write("")
     with open('src/Robot.json', encoding='utf-8') as anim_source:
         animation = json.load(anim_source)
     st_lottie(animation, 1, True, True, "high", 100, -200)
 
-    # Initialize session state variables
     if 'pdf_docs' not in st.session_state:
         st.session_state.pdf_docs = None
 
@@ -115,10 +109,8 @@ def main():
     if 'prompt_selected' not in st.session_state:
         st.session_state.prompt_selected = ""
 
-    # File uploader for PDF documents
     pdf_docs = st.file_uploader("Upload your PDF Files and Click on the Submit & Process Button", accept_multiple_files=True)
 
-    # Button to trigger processing of uploaded PDFs
     if st.button("Train & Process"):
         if pdf_docs:
             with st.spinner("🤖Processing..."):
@@ -127,11 +119,11 @@ def main():
                 get_vector_store(text_chunks)
                 st.success("Done, AI is trained")
 
-    # Text input for user questions
+    
+
     user_question = st.text_input("Ask a Question from the PDF Files")
     enter_button = st.button('Enter')
 
-    # Handle user input to trigger AI response
     if enter_button or st.session_state.prompt_selected:
         if st.session_state.prompt_selected:
             user_question = st.session_state.prompt_selected
@@ -143,7 +135,6 @@ def main():
         if user_question:
             user_input(user_question)
 
-    # Store PDF documents in session state
     if pdf_docs:
         st.session_state.pdf_docs = pdf_docs
 
