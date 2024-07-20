@@ -17,7 +17,7 @@ import asyncio
 
 load_dotenv()
 
-os.getenv("GOOGLE_API_KEY")
+##os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 def get_pdf_text(pdf_docs):
@@ -58,7 +58,7 @@ async def get_conversational_chain():
     5. If information not found then search on google and then provide reply.
     6. (but then mention the reference name)
     7. If 'Summarize' word is used in input then Summarize the context.
-    8. If input is: 'Hello', reply: Hey hi Suraj.\n\n
+    8. If input is: 'Hello', reply: Hey hi team vikings welcomes you.\n\n
     9. Use Markdown font to make text more readable
     
     Context:\n {context}?\n
@@ -89,9 +89,8 @@ def user_input(user_question):
     st.write("Reply: ", st.session_state.output_text)
 
 def main():
-    # st.set_page_config("College.ai", page_icon='🔍', layout='centered')
-   
-    st.write("<h1><center>One-Click Conversions</center></h1>", unsafe_allow_html=True)
+
+    st.write("<h1><center>Ask me</center></h1>", unsafe_allow_html=True)
     st.write("")
     with open('src/Robot.json', encoding='utf-8') as anim_source:
         animation = json.load(anim_source)
@@ -109,19 +108,19 @@ def main():
     if 'prompt_selected' not in st.session_state:
         st.session_state.prompt_selected = ""
 
-    pdf_docs = st.file_uploader("Upload your PDF Files and Click on the Submit & Process Button", accept_multiple_files=True)
+    pdf_docs = st.file_uploader("Upload your PDF Files and Click on the Train cheyyu Button", accept_multiple_files=True)
 
-    if st.button("Train & Process"):
+    if st.button("Train cheyyu"):
         if pdf_docs:
-            with st.spinner("🤖Processing..."):
+            with st.spinner("🔎Avuthundhi..."):
                 raw_text = get_pdf_text(pdf_docs)
                 text_chunks = get_text_chunks(raw_text)
                 get_vector_store(text_chunks)
-                st.success("Done, AI is trained")
+                st.success("Train ipoindhi bro")
 
     
 
-    user_question = st.text_input("Ask a Question from the PDF Files")
+    user_question = st.text_input("Ask a Question")
     enter_button = st.button('Enter')
 
     if enter_button or st.session_state.prompt_selected:
