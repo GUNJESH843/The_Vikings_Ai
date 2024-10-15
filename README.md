@@ -65,4 +65,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Contact
 
-If you have any questions or suggestions, feel free to reach out at [Gunjesh Kumar](kumargunjesh843@gmail.com).
+If you have any questions or suggestions, please reach out to kumargunjesh843@gmail.com.
